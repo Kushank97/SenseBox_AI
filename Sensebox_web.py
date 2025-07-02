@@ -3,13 +3,18 @@ import joblib
 import pandas as pd
 import os
 
-# Load Models
-spam_model = joblib.load(r"C:\Users\KUSHANK\OneDrive\Desktop\Project\spam_classifier.pkl")
-language_model = joblib.load(r"C:\Users\KUSHANK\OneDrive\Desktop\Project\lang_det.pkl")
-news_model = joblib.load(r"C:\Users\KUSHANK\OneDrive\Desktop\Project\news_cat.pkl")
-review_model = joblib.load(r"C:\Users\KUSHANK\OneDrive\Desktop\Project\review.pkl")
 
-# Set Sentiment Analysis background
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+
+
+spam_model = joblib.load(os.path.join(MODEL_DIR, "spam_classifier.pkl"))
+language_model = joblib.load(os.path.join(MODEL_DIR, "lang_det.pkl"))
+news_model = joblib.load(os.path.join(MODEL_DIR, "news_cat.pkl"))
+review_model = joblib.load(os.path.join(MODEL_DIR, "review.pkl"))
+
 def set_background():
     st.markdown(
         """
@@ -85,14 +90,14 @@ def set_background():
     )
     
 
-# Page Setup
+
 st.set_page_config(
     page_title="Sense Box AI",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Set the background
+
 set_background()
 
 with st.sidebar:
@@ -132,7 +137,7 @@ with st.sidebar:
         st.link_button("💻 GitHub", "https://github.com/Kushank97")
         st.link_button("🔗 LinkedIn", "https://www.linkedin.com/in/kushank-sharma-72bb86296")
 
-# Main content
+
 st.markdown('<h1 class="title-text">🎯 Sense Box AI: Market Sentiment Engine</h1>', unsafe_allow_html=True)
 
 # Tabs
@@ -156,7 +161,7 @@ def read_uploaded_file(uploaded_file):
         st.error(f"Error reading file: {str(e)}")
         return None
 
-# --- TAB 1: Spam Classifier ---
+
 with tab1:
     st.header("📩 Spam Classifier")
     
@@ -193,7 +198,7 @@ with tab1:
             df_spam["Prediction"] = df_spam["Prediction"].map({0: 'Spam', 1: 'Not Spam'})
             st.dataframe(df_spam)
 
-# --- TAB 2: Language Detection ---
+
 with tab2:
     st.header("🌐 Language Detection")
     
@@ -230,7 +235,6 @@ with tab2:
             df_lang["Language"] = language_model.predict(df_lang["Text"])
             st.dataframe(df_lang)
 
-# --- TAB 3: Food Review Sentiment ---
 with tab3:
     st.header("🍽️ Food Review Sentiment")
     
@@ -271,7 +275,7 @@ with tab3:
             df_rev["Sentiment"] = df_rev["Sentiment"].map({0: 'Negative Feedback', 1: 'Positive Feedback'})
             st.dataframe(df_rev)
 
-# --- TAB 4: News Classification ---
+
 with tab4:
     st.header("📰 News Classification")
     
@@ -292,10 +296,9 @@ with tab4:
         else:
             st.warning("⚠️ under_construction.png not found in project folder.")
 
-# --- TAB 5: Data Analyst Portfolio ---
-# --- TAB 5: Data Analyst Portfolio ---
+
 with tab5:
-    # Custom CSS for this tab with better text contrast
+    
     st.markdown(
         """
         <style>
@@ -371,7 +374,7 @@ with tab5:
             
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # ===== Project 2 =====
+       
         with st.container():
             st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
             
@@ -404,7 +407,7 @@ with tab5:
             
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # ===== Project 3 =====
+       
         with st.container():
             st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
             
@@ -438,7 +441,7 @@ with tab5:
             
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # ===== Project 4 =====
+       
         with st.container():
             st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
             
