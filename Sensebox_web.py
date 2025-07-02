@@ -3,17 +3,22 @@ import joblib
 import pandas as pd
 import os
 
+# Set page config first
+st.set_page_config(
+    page_title="Sense Box AI",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-
-MODEL_DIR = os.path.join(BASE_DIR, "models")
-
-
-spam_model = joblib.load(os.path.join(MODEL_DIR, "spam_classifier.pkl"))
-language_model = joblib.load(os.path.join(MODEL_DIR, "lang_det.pkl"))
-news_model = joblib.load(os.path.join(MODEL_DIR, "news_cat.pkl"))
-review_model = joblib.load(os.path.join(MODEL_DIR, "review.pkl"))
+# Load models - use direct paths for Streamlit Cloud
+try:
+    spam_model = joblib.load("models/spam_classifier.pkl")
+    language_model = joblib.load("models/lang_det.pkl")
+    news_model = joblib.load("models/news_cat.pkl")
+    review_model = joblib.load("models/review.pkl")
+except Exception as e:
+    st.error(f"Failed to load models: {str(e)}")
+    st.stop()
 
 def set_background():
     st.markdown(
@@ -84,27 +89,40 @@ def set_background():
             border-radius: 10px;
             margin-bottom: 1.5rem;
         }
+        .portfolio-tab {
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: -1rem;
+        }
+        .portfolio-project {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #4CAF50;
+        }
+        .project-title {
+            color: #4CAF50 !important;
+            margin-bottom: 1rem !important;
+        }
+        .project-image {
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
         </style>
         """,
         unsafe_allow_html=True
     )
-    
-
-
-st.set_page_config(
-    page_title="Sense Box AI",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 
 set_background()
 
+# Sidebar
 with st.sidebar:
-    if os.path.exists("kushank.png"):
-        st.image("kushank.png", caption="Sense Box AI", use_container_width=True)
-    else:
-        st.warning("⚠️ kushank.png not found in project folder.")
+    try:
+        st.image("images/kushank.png", caption="Sense Box AI", use_container_width=True)
+    except:
+        st.warning("Profile image not found")
 
     with st.expander("🧑‍💻 About Me"):
         st.markdown("""
@@ -121,13 +139,6 @@ with st.sidebar:
         Sense Box AI is a machine learning web app that uses NLP techniques to classify and analyze text. 
         Built with NLTK, scikit-learn, and Streamlit, it features four predictive models for tasks like 
         spam detection, sentiment analysis, and language detection.
-        
-        The app uses:
-        - TF-IDF vectorization
-        - Algorithms like Logistic Regression and Multinomial Naive Bayes
-        - Tools like Pipeline, Joblib, and imblearn 
-        
-        for efficient training and deployment.
         </div>
         """, unsafe_allow_html=True)
 
@@ -137,7 +148,7 @@ with st.sidebar:
         st.link_button("💻 GitHub", "https://github.com/Kushank97")
         st.link_button("🔗 LinkedIn", "https://www.linkedin.com/in/kushank-sharma-72bb86296")
 
-
+# Main content
 st.markdown('<h1 class="title-text">🎯 Sense Box AI: Market Sentiment Engine</h1>', unsafe_allow_html=True)
 
 # Tabs
@@ -155,13 +166,13 @@ def read_uploaded_file(uploaded_file):
         if uploaded_file.name.endswith('.csv'):
             return pd.read_csv(uploaded_file)
         else:  # TXT file
-            content = uploaded_file.read().decode('utf-8')
+            content = uploaded_file.getvalue().decode('utf-8')
             return pd.DataFrame({'text': content.split('\n')})
     except Exception as e:
         st.error(f"Error reading file: {str(e)}")
         return None
 
-
+# Tab 1: Spam Classifier
 with tab1:
     st.header("📩 Spam Classifier")
     
@@ -171,7 +182,7 @@ with tab1:
         <h4>Model Description</h4>
         <p>This model classifies text messages as either spam or not spam using machine learning. 
         Trained on labeled data, it uses TF-IDF vectorization and algorithms like Logistic Regression 
-        to detect promotional or harmful content, helping filter unwanted messages effectively.</p>
+        to detect promotional or harmful content.</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -180,10 +191,16 @@ with tab1:
         pred = spam_model.predict([msg])
         if pred[0] == 0:
             st.success("❌ Spam Detected!")
-            st.image("spams.webp", width=300)
+            try:
+                st.image("images/spams.webp", width=300)
+            except:
+                pass
         else:
             st.success("✅ Not Spam!")
-            st.image("tick.jpg", width=300)
+            try:
+                st.image("images/tick.jpg", width=300)
+            except:
+                pass
 
     uploaded_file = st.file_uploader("Upload a file (CSV or TXT)", type=["csv", "txt"])
     if uploaded_file:
@@ -198,7 +215,7 @@ with tab1:
             df_spam["Prediction"] = df_spam["Prediction"].map({0: 'Spam', 1: 'Not Spam'})
             st.dataframe(df_spam)
 
-
+# Tab 2: Language Detection
 with tab2:
     st.header("🌐 Language Detection")
     
@@ -207,9 +224,7 @@ with tab2:
         <div class="model-info">
         <h4>Model Description</h4>
         <p>This model identifies the language of any given text input. It analyzes character 
-        and word patterns to distinguish between multiple languages. Useful for multilingual 
-        applications, the model combines text preprocessing and classification techniques to 
-        deliver fast, reliable results.</p>
+        and word patterns to distinguish between multiple languages.</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -235,6 +250,7 @@ with tab2:
             df_lang["Language"] = language_model.predict(df_lang["Text"])
             st.dataframe(df_lang)
 
+# Tab 3: Food Review Sentiment
 with tab3:
     st.header("🍽️ Food Review Sentiment")
     
@@ -243,9 +259,7 @@ with tab3:
         <div class="model-info">
         <h4>Model Description</h4>
         <p>The sentiment analysis model determines whether a given text expresses positive or negative 
-        emotions. It applies NLP techniques to understand tone and opinion, commonly used in reviews, 
-        feedback, or social media analysis. The model uses TF-IDF and supervised algorithms for 
-        accurate predictions.</p>
+        emotions. It applies NLP techniques to understand tone and opinion.</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -275,7 +289,7 @@ with tab3:
             df_rev["Sentiment"] = df_rev["Sentiment"].map({0: 'Negative Feedback', 1: 'Positive Feedback'})
             st.dataframe(df_rev)
 
-
+# Tab 4: News Classification
 with tab4:
     st.header("📰 News Classification")
     
@@ -284,194 +298,76 @@ with tab4:
         <div class="model-info">
         <h4>Model Description</h4>
         <p>This model is currently under development to deliver more accurate and reliable category 
-        predictions for news articles. I am improving its training data and algorithms to ensure 
-        better performance in classifying news into topics like sports, politics, and technology. 
-        Stay tuned for updates!</p>
+        predictions for news articles.</p>
         </div>
         """, unsafe_allow_html=True)
 
-    
-        if os.path.exists("under_construction.png"):
-            st.image("under_construction.png", width=300)
-        else:
-            st.warning("⚠️ under_construction.png not found in project folder.")
+    try:
+        st.image("images/under_construction.png", width=300)
+    except:
+        st.warning("Under construction image not found")
 
-
+# Tab 5: Portfolio
 with tab5:
+    st.markdown('<h1 style="color:#4CAF50; text-align:center;">📊 Data Analyst Portfolio</h1>', unsafe_allow_html=True)
+    st.markdown("---")
     
-    st.markdown(
-        """
-        <style>
-        .portfolio-tab {
-            background: linear-gradient(to bottom, #1a1a2e, #16213e);
-            padding: 2rem;
-            border-radius: 15px;
-            margin: -1rem;
-        }
-        .portfolio-project {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            border-left: 4px solid #4CAF50;
-        }
-        .project-title {
-            color: #4CAF50 !important;
-            margin-bottom: 1rem !important;
-        }
-        .project-image {
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .portfolio-tab p, .portfolio-tab li {
-            color: #ffffff !important;
-        }
-        .portfolio-tab h1, .portfolio-tab h2, .portfolio-tab h3 {
-            color: #4CAF50 !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    
+    # Project 1
     with st.container():
-        st.markdown('<div class="portfolio-tab">', unsafe_allow_html=True)
+        st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
+        st.markdown('<h3 class="project-title">1. Netflix Content Analysis</h3>', unsafe_allow_html=True)
         
-        st.markdown('<h1 style="color:#4CAF50; text-align:center;">📊 Data Analyst Portfolio</h1>', unsafe_allow_html=True)
-        st.markdown("---")
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            try:
+                st.image("images/netflix.png", width=300, use_container_width=True, caption="Netflix Analysis Dashboard")
+            except:
+                st.warning("Netflix image not found")
         
-        # ===== Project 1 =====
-        with st.container():
-            st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
+        with col2:
+            st.markdown("""
+            **Project Overview**:  
+            Comprehensive analysis of Netflix's content catalog revealing:
+            - Content distribution (Movies vs TV Shows)
+            - Release trends and seasonality patterns
+            - Geographic production hubs
             
-            st.markdown('<h3 class="project-title">1. Netflix Content Analysis</h3>', unsafe_allow_html=True)
+            **Technologies Used**: Python, Pandas, Matplotlib, Seaborn
+            """)
             
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                if os.path.exists("netflix.png"):
-                    st.image("netflix.png", width=300, use_container_width=True, clamp=True, caption="Netflix Analysis Dashboard")
-                else:
-                    st.warning("Image not found: netflix.png")
-            
-            with col2:
-                st.markdown("""
-                **Project Overview**:  
-                Comprehensive analysis of Netflix's content catalog revealing:
-                - Content distribution (Movies vs TV Shows)
-                - Release trends and seasonality patterns
-                - Geographic production hubs
-                - Viewer demographics through rating analysis
-                - Optimal content duration insights
-                
-                **Technologies Used**: Python, Pandas, Matplotlib, Seaborn
-                """)
-                
-                st.markdown("""
-                **Links**:  
-                [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/github.png' width='20'/> GitHub](https://github.com/Kushank97/Netflix-Content-Analysis) | 
-                [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/linkedin.png' width='20'/> LinkedIn Post](https://www.linkedin.com/feed/update/urn:li:activity:7337025775650357249/)
-                """, unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("""
+            **Links**:  
+            [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/github.png' width='20'/> GitHub](https://github.com/Kushank97/Netflix-Content-Analysis)
+            """, unsafe_allow_html=True)
         
-       
-        with st.container():
-            st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
-            
-            st.markdown('<h3 class="project-title">2. Ola Rides Data Analysis</h3>', unsafe_allow_html=True)
-            
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                if os.path.exists("ola.png"):
-                    st.image("ola.png", width=300, use_container_width=True, caption="Ola Rides Analysis Dashboard")
-                else:
-                    st.warning("Image not found: ola.png")
-            
-            with col2:
-                st.markdown("""
-                **Project Overview**:  
-                Analysis of 100,000+ Ola ride records uncovering:
-                - Customer behavior and ride patterns
-                - Cancellation trends and reasons
-                - Payment method preferences
-                - Peak demand periods and pricing
-                - Driver performance metrics
-                
-                **Technologies Used**: SQL, Power BI, Excel
-                """)
-                
-                st.markdown("""
-                **Links**:  
-                [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/github.png' width='20'/> GitHub](https://github.com/Kushank97/-Ola-Rides-Data-Analysis-Project)
-                """, unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Project 2
+    with st.container():
+        st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
+        st.markdown('<h3 class="project-title">2. Ola Rides Data Analysis</h3>', unsafe_allow_html=True)
         
-       
-        with st.container():
-            st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
-            
-            st.markdown('<h3 class="project-title">3. Music Store Data Analysis</h3>', unsafe_allow_html=True)
-            
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                if os.path.exists("musicstore.png"):
-                    st.image("musicstore.png", width=300, use_container_width=True, caption="Music Store Analysis")
-                else:
-                    st.warning("Image not found: musicstore.png")
-            
-            with col2:
-                st.markdown("""
-                **Project Overview**:  
-                SQL and Python analysis of a music store database:
-                - Sales trends and customer segmentation
-                - Popular genres and artist performance
-                - Inventory and purchasing patterns
-                - Geographic sales distribution
-                
-                
-                **Technologies Used**: PostgreSQL, Python, Pandas, Matplotlib
-                """)
-                
-                st.markdown("""
-                **Links**:  
-                [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/github.png' width='20'/> GitHub](https://github.com/Kushank97/E-Commerce-Sales-Analysis-Dashboard) | 
-                [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/linkedin.png' width='20'/> LinkedIn Post](https://www.linkedin.com/posts/kushank-sharma-72bb86296_dataanalysis-sql-python-activity-7332007039226863616-lda5)
-                """, unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            try:
+                st.image("images/ola.png", width=300, use_container_width=True, caption="Ola Rides Analysis Dashboard")
+            except:
+                st.warning("Ola image not found")
         
-       
-        with st.container():
-            st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
+        with col2:
+            st.markdown("""
+            **Project Overview**:  
+            Analysis of 100,000+ Ola ride records uncovering:
+            - Customer behavior and ride patterns
+            - Cancellation trends and reasons
+            - Payment method preferences
             
-            st.markdown('<h3 class="project-title">4. E-Commerce Sales Dashboard</h3>', unsafe_allow_html=True)
+            **Technologies Used**: SQL, Power BI, Excel
+            """)
             
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                if os.path.exists("dashboard.png"):
-                    st.image("dashboard.png", width=300, use_container_width=True, caption="E-Commerce Dashboard")
-                else:
-                    st.warning("Image not found: dashboard.png")
-            
-            with col2:
-                st.markdown("""
-                **Project Overview**:  
-                Interactive Power BI dashboard analyzing:
-                - Sales performance by product/category
-                - Customer demographics and behavior
-                - Regional sales distribution
-                - Seasonal trends and forecasting
-                - Profitability analysis
-                
-                **Technologies Used**: Power BI, DAX, Power Query, Excel
-                """)
-                
-                st.markdown("""
-                **Links**:  
-                [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/github.png' width='20'/> GitHub](https://github.com/Kushank97/E-Commerce-Sales-Analysis-Dashboard)
-                """, unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("""
+            **Links**:  
+            [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/github.png' width='20'/> GitHub](https://github.com/Kushank97/-Ola-Rides-Data-Analysis-Project)
+            """, unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
