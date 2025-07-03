@@ -99,6 +99,22 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Force dark mode always
+st.markdown(
+    """
+    <style>
+    :root {
+        color-scheme: dark !important;
+    }
+    html, body, [class*="css"] {
+        color: white !important;
+        background-color: #0f0c29 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Set the background
 set_background()
 
