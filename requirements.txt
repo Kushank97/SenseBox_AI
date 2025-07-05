@@ -1,3 +1,4 @@
 joblib
 imblearn
 pandas
+streamlit_lottie
