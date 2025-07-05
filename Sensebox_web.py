@@ -6,13 +6,13 @@ from streamlit_lottie import st_lottie
 import json
 from typing import Optional
 
-# Get the current directory (folder where Sensebox_web.py is located)
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Path to the models folder
+
 MODEL_DIR = os.path.join(BASE_DIR, "models")
 
-# Load Models using relative paths
+
 spam_model = joblib.load(os.path.join(MODEL_DIR, "spam_classifier.pkl"))
 language_model = joblib.load(os.path.join(MODEL_DIR, "lang_det.pkl"))
 news_model = joblib.load(os.path.join(MODEL_DIR, "news_cat.pkl"))
@@ -26,13 +26,13 @@ def load_lottiefile(filepath: str) -> Optional[dict]:
     except:
         return None
 
-# Load animations
+
 animation_spam = load_lottiefile("spam_animation.json") if os.path.exists("spam_animation.json") else None
 animation_language = load_lottiefile("language_animation.json") if os.path.exists("language_animation.json") else None
 animation_sentiment = load_lottiefile("sentiment_animation.json") if os.path.exists("sentiment_animation.json") else None
 animation_news = load_lottiefile("news_animation.json") if os.path.exists("news_animation.json") else None
 
-# Set Sentiment Analysis background
+
 def set_background():
     st.markdown(
         """
@@ -181,14 +181,14 @@ def set_background():
     )
     
 
-# Page Setup
+
 st.set_page_config(
     page_title="Sense Box AI",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Set the background
+
 set_background()
 
 with st.sidebar:
@@ -264,10 +264,10 @@ with st.sidebar:
         st.link_button("💻 GitHub", "https://github.com/Kushank97")
         st.link_button("🔗 LinkedIn", "https://www.linkedin.com/in/kushank-sharma-72bb86296")
 
-# Main content
+
 st.markdown('<h1 class="title-text">🎯 Sense Box AI: Market Sentiment Engine</h1>', unsafe_allow_html=True)
 
-# Tabs
+
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "🤖 Spam Classifier",
     "🗣️ Language Detection", 
@@ -288,7 +288,7 @@ def read_uploaded_file(uploaded_file):
         st.error(f"Error reading file: {str(e)}")
         return None
 
-# --- TAB 1: Spam Classifier ---
+
 with tab1:
     st.header("📩 Spam Classifier")
     
@@ -328,7 +328,7 @@ with tab1:
             df_spam["Prediction"] = df_spam["Prediction"].map({0: 'Spam', 1: 'Not Spam'})
             st.dataframe(df_spam)
 
-# --- TAB 2: Language Detection ---
+
 with tab2:
     st.header("🌐 Language Detection")
     
@@ -368,7 +368,7 @@ with tab2:
             df_lang["Language"] = language_model.predict(df_lang["Text"])
             st.dataframe(df_lang)
 
-# --- TAB 3: Food Review Sentiment ---
+
 with tab3:
     st.header("🍽️ Food Review Sentiment")
     
@@ -412,7 +412,7 @@ with tab3:
             df_rev["Sentiment"] = df_rev["Sentiment"].map({0: 'Negative Feedback', 1: 'Positive Feedback'})
             st.dataframe(df_rev)
 
-# --- TAB 4: News Classification ---
+
 with tab4:
     st.header("📰 News Classification")
     
@@ -436,9 +436,9 @@ with tab4:
         else:
             st.warning("⚠️ under_construction.png not found in project folder.")
 
-# --- TAB 5: Data Analyst Portfolio ---
+
 with tab5:
-    # Custom CSS for this tab with better text contrast
+    
     st.markdown(
         """
         <style>
@@ -514,7 +514,7 @@ with tab5:
             
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # ===== Project 2 =====
+      
         with st.container():
             st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
             
@@ -547,7 +547,7 @@ with tab5:
             
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # ===== Project 3 =====
+     
         with st.container():
             st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
             
@@ -581,7 +581,7 @@ with tab5:
             
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # ===== Project 4 =====
+       
         with st.container():
             st.markdown('<div class="portfolio-project">', unsafe_allow_html=True)
             
