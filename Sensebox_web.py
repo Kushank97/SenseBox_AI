@@ -2,6 +2,9 @@ import streamlit as st
 import joblib
 import pandas as pd
 import os
+from streamlit_lottie import st_lottie
+import json
+from typing import Optional
 
 # Get the current directory (folder where Sensebox_web.py is located)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,6 +18,19 @@ language_model = joblib.load(os.path.join(MODEL_DIR, "lang_det.pkl"))
 news_model = joblib.load(os.path.join(MODEL_DIR, "news_cat.pkl"))
 review_model = joblib.load(os.path.join(MODEL_DIR, "review.pkl"))
 
+def load_lottiefile(filepath: str) -> Optional[dict]:
+    """Load Lottie animation file"""
+    try:
+        with open(filepath, "r") as f:
+            return json.load(f)
+    except:
+        return None
+
+# Load animations
+animation_spam = load_lottiefile("spam_animation.json") if os.path.exists("spam_animation.json") else None
+animation_language = load_lottiefile("language_animation.json") if os.path.exists("language_animation.json") else None
+animation_sentiment = load_lottiefile("sentiment_animation.json") if os.path.exists("sentiment_animation.json") else None
+animation_news = load_lottiefile("news_animation.json") if os.path.exists("news_animation.json") else None
 
 # Set Sentiment Analysis background
 def set_background():
@@ -27,6 +43,13 @@ def set_background():
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
+        }
+        [data-testid="stSidebar"] {
+            background-color: #000000 !important;
+            border-right: 1px solid #333333;
+        }
+        .sidebar .sidebar-content {
+            background-color: #000000;
         }
         .main {
             background-color: rgba(25, 25, 50, 0.9) !important;
@@ -54,6 +77,11 @@ def set_background():
             border: none;
             border-radius: 4px;
             padding: 8px 16px;
+            transition: all 0.3s ease;
+        }
+        .stButton>button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
         }
         .stAlert .st-b7 {
             background-color: rgba(46, 125, 50, 0.9) !important;
@@ -79,12 +107,73 @@ def set_background():
         .title-text {
             color: #4CAF50 !important;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            animation: fadeIn 1.5s ease-in-out;
         }
         .model-info {
             background-color: rgba(40, 40, 80, 0.7) !important;
             padding: 1rem;
             border-radius: 10px;
             margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .model-info:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .portfolio-tab {
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: -1rem;
+            animation: slideIn 1s ease-out;
+        }
+        .portfolio-project {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+        .portfolio-project:hover {
+            transform: scale(1.01);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+        }
+        .project-title {
+            color: #4CAF50 !important;
+            margin-bottom: 1rem !important;
+        }
+        .project-image {
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .project-image:hover {
+            transform: scale(1.03);
+        }
+        .portfolio-tab p, .portfolio-tab li {
+            color: #ffffff !important;
+        }
+        .portfolio-tab h1, .portfolio-tab h2, .portfolio-tab h3 {
+            color: #4CAF50 !important;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .tab-content {
+            animation: fadeIn 0.8s ease-out;
+        }
+        .success-message {
+            animation: bounce 0.5s ease;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         </style>
         """,
@@ -99,26 +188,46 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Force dark mode always
-st.markdown(
-    """
-    <style>
-    :root {
-        color-scheme: dark !important;
-    }
-    html, body, [class*="css"] {
-        color: white !important;
-        background-color: #0f0c29 !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Set the background
 set_background()
 
 with st.sidebar:
+    st.markdown("""
+    <style>
+    /* Add this new CSS for file uploader */
+    .stFileUploader > div > div {
+        background-color: #000000 !important;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    .stFileUploader > div > div:hover {
+        border-color: #4CAF50 !important;
+    }
+    .stFileUploader > label > div > p {
+        color: white !important;
+    }
+    
+    /* Animation for sidebar image */
+    .sidebar-image {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Animation for project cards */
+    .project-card-animation {
+        transition: all 0.5s ease;
+    }
+    .project-card-animation:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     if os.path.exists("kushank.png"):
         st.image("kushank.png", caption="Sense Box AI", use_container_width=True)
     else:
@@ -183,6 +292,9 @@ def read_uploaded_file(uploaded_file):
 with tab1:
     st.header("📩 Spam Classifier")
     
+    if animation_spam:
+        st_lottie(animation_spam, height=200, key="spam_animation")
+    
     with st.container():
         st.markdown("""
         <div class="model-info">
@@ -197,10 +309,10 @@ with tab1:
     if st.button("Detect Spam"):
         pred = spam_model.predict([msg])
         if pred[0] == 0:
-            st.success("❌ Spam Detected!")
+            st.success("❌ Spam Detected!", icon="⚠️")
             st.image("spams.webp", width=300)
         else:
-            st.success("✅ Not Spam!")
+            st.success("✅ Not Spam!", icon="👍")
             st.image("tick.jpg", width=300)
 
     uploaded_file = st.file_uploader("Upload a file (CSV or TXT)", type=["csv", "txt"])
@@ -220,6 +332,9 @@ with tab1:
 with tab2:
     st.header("🌐 Language Detection")
     
+    if animation_language:
+        st_lottie(animation_language, height=200, key="language_animation")
+    
     with st.container():
         st.markdown("""
         <div class="model-info">
@@ -234,7 +349,7 @@ with tab2:
     text = st.text_area("Enter text to detect language")
     if st.button("Detect Language"):
         pred = language_model.predict([text])
-        st.success(f"🈯 Detected Language: **{pred[0]}**")
+        st.success(f"🈯 Detected Language: **{pred[0]}**", icon="🌍")
 
     uploaded_file = st.file_uploader("Upload a file (CSV or TXT)", type=["csv", "txt"], key="lang")
     if uploaded_file:
@@ -257,6 +372,9 @@ with tab2:
 with tab3:
     st.header("🍽️ Food Review Sentiment")
     
+    if animation_sentiment:
+        st_lottie(animation_sentiment, height=200, key="sentiment_animation")
+    
     with st.container():
         st.markdown("""
         <div class="model-info">
@@ -272,9 +390,9 @@ with tab3:
     if st.button("Analyze Sentiment"):
         pred = review_model.predict([review])
         if pred[0] == 0:
-            st.success("👎 Negative Feedback")
+            st.success("👎 Negative Feedback", icon="😞")
         else:
-            st.success("👍 Positive Feedback")
+            st.success("👍 Positive Feedback", icon="😊")
 
     uploaded_file = st.file_uploader("Upload a file (CSV or TXT)", type=["csv", "txt"], key="review")
     if uploaded_file:
@@ -298,6 +416,9 @@ with tab3:
 with tab4:
     st.header("📰 News Classification")
     
+    if animation_news:
+        st_lottie(animation_news, height=200, key="news_animation")
+    
     with st.container():
         st.markdown("""
         <div class="model-info">
@@ -315,7 +436,6 @@ with tab4:
         else:
             st.warning("⚠️ under_construction.png not found in project folder.")
 
-# --- TAB 5: Data Analyst Portfolio ---
 # --- TAB 5: Data Analyst Portfolio ---
 with tab5:
     # Custom CSS for this tab with better text contrast
@@ -455,7 +575,7 @@ with tab5:
                 
                 st.markdown("""
                 **Links**:  
-                [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/github.png' width='20'/> GitHub](https://github.com/Kushank97/E-Commerce-Sales-Analysis-Dashboard) | 
+                [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/github.png' width='20'/> GitHub](https://github.com/Kushank97/MusicStore_DataAnalysis) | 
                 [<img src='https://img.icons8.com/ios-glyphs/30/4CAF50/linkedin.png' width='20'/> LinkedIn Post](https://www.linkedin.com/posts/kushank-sharma-72bb86296_dataanalysis-sql-python-activity-7332007039226863616-lda5)
                 """, unsafe_allow_html=True)
             
